@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedLedger - Patient Timeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- GSAP & ScrollTrigger Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <link rel="stylesheet" href="unified-theme.css">
+    <link rel="stylesheet" href="timeline.css">
+</head>
+<body>
+    <!-- ========================================= -->
+    <!--  AMBIENT ANIMATED BACKGROUND (Fixed)      -->
+    <!-- ========================================= -->
+    <svg class="ambient-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
+        viewBox="0 0 1440 800">
+        <defs>
+            <filter id="glow-subtle" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="glow-heavy" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="blur-particle" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="15" />
+            </filter>
+
+            <!-- Lighter, softer strokes for the calm modern gradient -->
+            <linearGradient id="grad-indigo-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0" />
+                <stop offset="30%" stop-color="#38bdf8" stop-opacity="0.6" />
+                <stop offset="70%" stop-color="#818cf8" stop-opacity="0.6" />
+                <stop offset="100%" stop-color="#6ee7b7" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="grad-cyan-indigo" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#fdba74" stop-opacity="0" />
+                <stop offset="40%" stop-color="#fdba74" stop-opacity="0.5" />
+                <stop offset="60%" stop-color="#fbcfe8" stop-opacity="0.5" />
+                <stop offset="100%" stop-color="#bae6fd" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="grad-ecg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#fdba74" stop-opacity="0" />
+                <stop offset="25%" stop-color="#fdba74" stop-opacity="0.3" />
+                <stop offset="50%" stop-color="#fb923c" stop-opacity="0.9" /> /* Soft Peach ECG spike */
+                <stop offset="75%" stop-color="#38bdf8" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+            </linearGradient>
+        </defs>
+
+        <!-- Base smooth ambient data lines -->
+        <g filter="url(#glow-subtle)" opacity="0.6">
+            <path class="animated-line line-flow-1" d="M-100,500 C200,450 400,650 700,400 S1100,200 1540,300"
+                stroke="url(#grad-indigo-cyan)" stroke-width="1.5" />
+            <path class="animated-line line-flow-2" d="M-100,250 C300,150 500,450 800,300 S1200,150 1540,200"
+                stroke="url(#grad-cyan-indigo)" stroke-width="1" />
+            <path class="animated-line line-flow-3" d="M-100,700 C250,750 600,600 900,650 S1300,800 1540,750"
+                stroke="url(#grad-indigo-cyan)" stroke-width="2" />
+        </g>
+
+        <!-- Neural Nodes -->
+        <g filter="url(#glow-subtle)" opacity="0.4">
+            <path class="animated-line neural-connector" d="M300,250 L450,400 L700,300 L950,550" stroke="#38bdf8"
+                stroke-width="1" opacity="0.5" />
+            <path class="animated-line neural-connector" d="M450,400 L600,600 L800,300 L1100,200" stroke="#818cf8"
+                stroke-width="1" opacity="0.3" />
+            <path class="animated-line neural-connector" d="M700,300 L850,150 L1100,200" stroke="#2dd4bf"
+                stroke-width="1" opacity="0.4" />
+
+            <circle cx="300" cy="250" r="3" class="neural-node node-delay-1" />
+            <circle cx="450" cy="400" r="4" class="neural-node node-delay-2" />
+            <circle cx="700" cy="300" r="3" class="neural-node node-delay-3" />
+            <circle cx="950" cy="550" r="4" class="neural-node node-delay-1" />
+            <circle cx="600" cy="600" r="3" class="neural-node node-delay-2" />
+            <circle cx="800" cy="300" r="4" class="neural-node node-delay-3" />
+            <circle cx="1100" cy="200" r="3" class="neural-node node-delay-1" />
+            <circle cx="850" cy="150" r="3" class="neural-node node-delay-2" />
+        </g>
+
+        <!-- Ambient ECG Highlight -->
+        <g filter="url(#glow-heavy)" opacity="0.5">
+            <path class="animated-line line-ecg"
+                d="M-100,450 L300,450 L330,410 L360,530 L390,450 L650,450 C750,450 800,550 900,550 C1000,550 1050,450 1150,450 L1250,450 L1270,380 L1300,560 L1330,450 L1540,450"
+                stroke="url(#grad-ecg)" stroke-width="2.5" />
+        </g>
+
+        <!-- Particles -->
+        <g>
+            <circle cx="20%" cy="80%" r="30" class="particle p1" />
+            <circle cx="50%" cy="30%" r="40" class="particle p2" />
+            <circle cx="80%" cy="70%" r="25" class="particle p3" />
+            <circle cx="85%" cy="20%" r="45" class="particle p4" />
+            <circle cx="35%" cy="50%" r="20" class="particle p5" />
+        </g>
+    </svg>
+
+    <div class="vignette"></div>
+    <!-- Top Navbar -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-left">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#0284c7" />
+                                <stop offset="100%" stop-color="#38bdf8" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Shield Outline -->
+                        <path d="M 50,15 L 20,25 L 20,55 C 20,75 50,90 50,90 C 50,90 80,75 80,55 L 80,25 Z"
+                            stroke="url(#shield-grad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="90" cy="55" r="4" fill="#38bdf8" />
+                    </svg>
+                    <span class="logo-text">EdgeScribe</span>
+                </div>
+            </div>
+            
+            <div class="navbar-center">
+                <nav class="nav-tabs">
+                    
+                    <button class="nav-tab" onclick="window.location.href='medledger.html'">Voice Workspace</button>
+                    <button class="nav-tab active">Patient Timeline</button>
+                    
+                </nav>
+            </div>
+            
+            <div class="navbar-right">
+                <div class="user-profile">
+                    <img src="https://picsum.photos/seed/doctor123/40/40.jpg" alt="User Profile">
+                </div>
+                
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="timeline-main">
+        <div class="timeline-container">
+            <!-- Left Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-card">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <circle cx="9" cy="9" r="7" stroke="#6B7A90" stroke-width="2"/>
+                                <path d="M14 14L18 18" stroke="#6B7A90" stroke-width="2"/>
+                            </svg>
+                            <input type="text" class="search-input" placeholder="Search patients...">
+                        </div>
+                    </div>
+
+                    <div class="consultations-list">
+                        <div class="list-header">
+                            <h3>Previous Consultations</h3>
+                            <span class="consultation-count">12</span>
+                        </div>
+                        
+                        <div class="consultation-items">
+                            <div class="consultation-item active">
+                                <div class="consultation-date">
+                                    <span class="date">Dec 24, 2024</span>
+                                    <span class="time">10:30 AM</span>
+                                </div>
+                                <div class="consultation-info">
+                                    <h4>Sarah Johnson</h4>
+                                    <p>Fever & Cough Follow-up</p>
+                                </div>
+                            </div>
+                            
+                            <div class="consultation-item">
+                                <div class="consultation-date">
+                                    <span class="date">Dec 22, 2024</span>
+                                    <span class="time">2:15 PM</span>
+                                </div>
+                                <div class="consultation-info">
+                                    <h4>Michael Chen</h4>
+                                    <p>Cardiology Review</p>
+                                </div>
+                            </div>
+                            
+                            <div class="consultation-item">
+                                <div class="consultation-date">
+                                    <span class="date">Dec 20, 2024</span>
+                                    <span class="time">11:00 AM</span>
+                                </div>
+                                <div class="consultation-info">
+                                    <h4>Emma Williams</h4>
+                                    <p>Diabetes Management</p>
+                                </div>
+                            </div>
+                            
+                            <div class="consultation-item">
+                                <div class="consultation-date">
+                                    <span class="date">Dec 18, 2024</span>
+                                    <span class="time">3:45 PM</span>
+                                </div>
+                                <div class="consultation-info">
+                                    <h4>James Davis</h4>
+                                    <p>Post-Surgery Check</p>
+                                </div>
+                            </div>
+                            
+                            <div class="consultation-item">
+                                <div class="consultation-date">
+                                    <span class="date">Dec 15, 2024</span>
+                                    <span class="time">9:30 AM</span>
+                                </div>
+                                <div class="consultation-info">
+                                    <h4>Lisa Anderson</h4>
+                                    <p>Annual Physical</p>
+                                </div>
+                            </div>
+                            
+                            <div class="consultation-item">
+                                <div class="consultation-date">
+                                    <span class="date">Dec 12, 2024</span>
+                                    <span class="time">1:20 PM</span>
+                                </div>
+                                <div class="consultation-info">
+                                    <h4>Robert Miller</h4>
+                                    <p>Hypertension Follow-up</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Main Panel -->
+            <section class="timeline-panel">
+                <div class="timeline-header">
+                    <div class="patient-info">
+                        <h2>Sarah Johnson</h2>
+                        <p>Patient ID: PT-2024-0847</p>
+                    </div>
+                    <div class="timeline-actions">
+                        <button class="emergency-view-btn" id="emergencyViewBtn">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1Z" stroke="#FF4757" stroke-width="2"/>
+                                <path d="M8 4V8L10 10" stroke="#FF4757" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Emergency View
+                        </button>
+                        <button class="export-all-btn">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 12L2 14C2 15.1046 2.89543 16 4 16L12 16C13.1046 16 14 15.1046 14 14L14 12" stroke="#1E5EFF" stroke-width="2"/>
+                                <path d="M8 1L8 11" stroke="#1E5EFF" stroke-width="2"/>
+                                <path d="M5 8L8 11L11 8" stroke="#1E5EFF" stroke-width="2"/>
+                            </svg>
+                            Export All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="timeline-content">
+                    <!-- Timeline Line -->
+                    <div class="timeline-line"></div>
+                    
+                    <!-- Timeline Entries -->
+                    <div class="timeline-entries">
+                        <!-- Entry 1 -->
+                        <div class="timeline-entry">
+                            <div class="timeline-node">
+                                <div class="node-circle"></div>
+                                <div class="node-date">Dec 24, 2024</div>
+                            </div>
+                            <div class="timeline-content-card">
+                                <div class="entry-header">
+                                    <h3>Fever & Cough Follow-up</h3>
+                                    <div class="entry-status signed">Signed</div>
+                                </div>
+                                <div class="entry-summary">
+                                    <p>Patient presents with 3-day history of fever and mild cough. Amoxicillin was discontinued due to allergic reaction. Prescribed paracetamol for fever management.</p>
+                                </div>
+                                <div class="entry-meta">
+                                    <span class="hash-id">Hash: 0x7f9a2b3c4d5e6f8a9b0c1d2e3f4a5b6c7d8e9f0</span>
+                                    <span class="entry-time">10:30 AM</span>
+                                </div>
+                                <div class="entry-actions">
+                                    <button class="action-btn view-btn">View Full Note</button>
+                                    <button class="action-btn export-btn">Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entry 2 -->
+                        <div class="timeline-entry">
+                            <div class="timeline-node">
+                                <div class="node-circle"></div>
+                                <div class="node-date">Dec 20, 2024</div>
+                            </div>
+                            <div class="timeline-content-card">
+                                <div class="entry-header">
+                                    <h3>Annual Physical Examination</h3>
+                                    <div class="entry-status signed">Signed</div>
+                                </div>
+                                <div class="entry-summary">
+                                    <p>Complete annual physical performed. Patient in good health with normal vital signs. Recommended lifestyle modifications and scheduled follow-up.</p>
+                                </div>
+                                <div class="entry-meta">
+                                    <span class="hash-id">Hash: 0x9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0</span>
+                                    <span class="entry-time">2:15 PM</span>
+                                </div>
+                                <div class="entry-actions">
+                                    <button class="action-btn view-btn">View Full Note</button>
+                                    <button class="action-btn export-btn">Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entry 3 -->
+                        <div class="timeline-entry">
+                            <div class="timeline-node">
+                                <div class="node-circle"></div>
+                                <div class="node-date">Dec 15, 2024</div>
+                            </div>
+                            <div class="timeline-content-card">
+                                <div class="entry-header">
+                                    <h3>Initial Consultation</h3>
+                                    <div class="entry-status signed">Signed</div>
+                                </div>
+                                <div class="entry-summary">
+                                    <p>New patient consultation. Comprehensive medical history taken. Baseline vitals recorded. Discussed preventive care and vaccination schedule.</p>
+                                </div>
+                                <div class="entry-meta">
+                                    <span class="hash-id">Hash: 0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0</span>
+                                    <span class="entry-time">11:00 AM</span>
+                                </div>
+                                <div class="entry-actions">
+                                    <button class="action-btn view-btn">View Full Note</button>
+                                    <button class="action-btn export-btn">Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entry 4 -->
+                        <div class="timeline-entry">
+                            <div class="timeline-node">
+                                <div class="node-circle"></div>
+                                <div class="node-date">Nov 28, 2024</div>
+                            </div>
+                            <div class="timeline-content-card">
+                                <div class="entry-header">
+                                    <h3>Laboratory Results Review</h3>
+                                    <div class="entry-status signed">Signed</div>
+                                </div>
+                                <div class="entry-summary">
+                                    <p>Reviewed recent blood work results. All values within normal range. Discussed cholesterol management and dietary recommendations.</p>
+                                </div>
+                                <div class="entry-meta">
+                                    <span class="hash-id">Hash: 0x5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6</span>
+                                    <span class="entry-time">3:30 PM</span>
+                                </div>
+                                <div class="entry-actions">
+                                    <button class="action-btn view-btn">View Full Note</button>
+                                    <button class="action-btn export-btn">Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entry 5 -->
+                        <div class="timeline-entry">
+                            <div class="timeline-node">
+                                <div class="node-circle"></div>
+                                <div class="node-date">Nov 10, 2024</div>
+                            </div>
+                            <div class="timeline-content-card">
+                                <div class="entry-header">
+                                    <h3>Medication Review</h3>
+                                    <div class="entry-status signed">Signed</div>
+                                </div>
+                                <div class="entry-summary">
+                                    <p>Comprehensive medication review conducted. Adjusted dosages based on current symptoms. Patient education on proper administration.</p>
+                                </div>
+                                <div class="entry-meta">
+                                    <span class="hash-id">Hash: 0x8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9</span>
+                                    <span class="entry-time">1:45 PM</span>
+                                </div>
+                                <div class="entry-actions">
+                                    <button class="action-btn view-btn">View Full Note</button>
+                                    <button class="action-btn export-btn">Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entry 6 -->
+                        <div class="timeline-entry">
+                            <div class="timeline-node">
+                                <div class="node-circle"></div>
+                                <div class="node-date">Oct 25, 2024</div>
+                            </div>
+                            <div class="timeline-content-card">
+                                <div class="entry-header">
+                                    <h3>Urgent Care Visit</h3>
+                                    <div class="entry-status signed">Signed</div>
+                                </div>
+                                <div class="entry-summary">
+                                    <p>Patient presented with acute respiratory symptoms. Immediate evaluation and treatment provided. Follow-up scheduled for monitoring.</p>
+                                </div>
+                                <div class="entry-meta">
+                                    <span class="hash-id">Hash: 0x3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2</span>
+                                    <span class="entry-time">4:20 PM</span>
+                                </div>
+                                <div class="entry-actions">
+                                    <button class="action-btn view-btn">View Full Note</button>
+                                    <button class="action-btn export-btn">Export</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Note View Modal -->
+    <div class="modal-overlay" id="noteModal">
+        <div class="modal note-modal">
+            <div class="modal-header">
+                <h3>Full Clinical Note</h3>
+                <button class="modal-close" id="noteModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="note-content">
+                    <div class="note-section">
+                        <h4>Subjective</h4>
+                        <p>Patient presents with 3-day history of fever and mild cough. Amoxicillin was discontinued due to allergic reaction. Patient also reports morning headaches and body pain.</p>
+                    </div>
+                    <div class="note-section">
+                        <h4>Objective</h4>
+                        <p>Blood pressure recorded at 140/90 mmHg. Throat examination reveals redness without significant infection. Patient appears alert and oriented.</p>
+                    </div>
+                    <div class="note-section">
+                        <h4>Assessment</h4>
+                        <p>Diagnosis: Upper respiratory infection with hypertension. Drug allergy: Amoxicillin. Condition: Stable, requires symptomatic treatment.</p>
+                    </div>
+                    <div class="note-section">
+                        <h4>Plan</h4>
+                        <p>Prescribe paracetamol for fever management. Advise rest and increased fluid intake. Follow up in 3 days if symptoms persist. Monitor blood pressure regularly.</p>
+                    </div>
+                </div>
+                <div class="note-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Hash ID:</span>
+                        <span class="meta-value">0x7f9a2b3c4d5e6f8a9b0c1d2e3f4a5b6c7d8e9f0</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Signed:</span>
+                        <span class="meta-value">Dec 24, 2024 at 10:45 AM</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Status:</span>
+                        <span class="meta-value status-signed">Immutable Record</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="noteModalCancel">Close</button>
+                <button class="modal-btn confirm" id="noteModalExport">Export PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency View Modal -->
+    <div class="emergency-modal-overlay" id="emergencyModal">
+        <div class="emergency-modal">
+            <div class="emergency-header">
+                <div class="emergency-header-content">
+                    <div class="emergency-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="#FF4757" stroke-width="2"/>
+                            <path d="M12 6V12L16 14" stroke="#FF4757" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <h1>EMERGENCY VIEW</h1>
+                    </div>
+                    <div class="emergency-patient-info">
+                        <h2>Sarah Johnson</h2>
+                        <p>Patient ID: PT-2024-0847 | Age: 34 | Blood Type: O+</p>
+                    </div>
+                </div>
+                <button class="emergency-close" id="emergencyClose">&times;</button>
+            </div>
+
+            <div class="emergency-content">
+                <div class="emergency-grid">
+                    <!-- Critical Allergies -->
+                    <div class="emergency-card critical">
+                        <div class="card-header">
+                            <h3>CRITICAL ALLERGIES</h3>
+                            <div class="alert-icon">⚠️</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="allergy-item severe">
+                                <span class="allergy-name">Amoxicillin</span>
+                                <span class="reaction-severe">SEVERE REACTION</span>
+                            </div>
+                            <div class="allergy-note">
+                                <strong>Stopped:</strong> Dec 20, 2024 due to allergic reaction including rash and difficulty breathing
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Diagnoses -->
+                    <div class="emergency-card">
+                        <div class="card-header">
+                            <h3>KEY DIAGNOSES</h3>
+                            <div class="diagnosis-icon">🏥</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="diagnosis-item">
+                                <span class="diagnosis-name">Upper Respiratory Infection</span>
+                                <span class="diagnosis-date">Dec 24, 2024</span>
+                            </div>
+                            <div class="diagnosis-item">
+                                <span class="diagnosis-name">Hypertension</span>
+                                <span class="diagnosis-date">Dec 20, 2024</span>
+                            </div>
+                            <div class="diagnosis-item">
+                                <span class="diagnosis-name">Seasonal Allergies</span>
+                                <span class="diagnosis-date">Nov 10, 2024</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medication History -->
+                    <div class="emergency-card">
+                        <div class="card-header">
+                            <h3>MEDICATION DECISIONS</h3>
+                            <div class="medication-icon">💊</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="medication-item stopped">
+                                <span class="med-name">Amoxicillin 500mg</span>
+                                <span class="med-status">STOPPED</span>
+                            </div>
+                            <div class="med-note">
+                                <strong>Reason:</strong> Allergic reaction - rash, urticaria, mild respiratory distress
+                            </div>
+                            <div class="medication-item active">
+                                <span class="med-name">Paracetamol 500mg</span>
+                                <span class="med-status">ACTIVE</span>
+                            </div>
+                            <div class="med-note">
+                                <strong>For:</strong> Fever management, PRN use
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Vitals -->
+                    <div class="emergency-card">
+                        <div class="card-header">
+                            <h3>RECENT VITALS</h3>
+                            <div class="vitals-icon">❤️</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="vitals-grid">
+                                <div class="vital-item">
+                                    <span class="vital-label">BP</span>
+                                    <span class="vital-value">140/90</span>
+                                    <span class="vital-date">Dec 24</span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="vital-label">HR</span>
+                                    <span class="vital-value">72</span>
+                                    <span class="vital-date">Dec 24</span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="vital-label">Temp</span>
+                                    <span class="vital-value">98.6°F</span>
+                                    <span class="vital-date">Dec 24</span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="vital-label">RR</span>
+                                    <span class="vital-value">16</span>
+                                    <span class="vital-date">Dec 24</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Contacts -->
+                    <div class="emergency-card full-width">
+                        <div class="card-header">
+                            <h3>EMERGENCY CONTACTS</h3>
+                            <div class="contact-icon">📞</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="contact-item">
+                                <div class="contact-info">
+                                    <span class="contact-name">Michael Johnson (Spouse)</span>
+                                    <span class="contact-phone">+1 (555) 123-4567</span>
+                                </div>
+                                <span class="contact-relation">Primary</span>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-info">
+                                    <span class="contact-name">Dr. Emily Chen (PCP)</span>
+                                    <span class="contact-phone">+1 (555) 987-6543</span>
+                                </div>
+                                <span class="contact-relation">Physician</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="emergency-footer">
+                <div class="emergency-timestamp">
+                    Last Updated: Dec 24, 2024 at 10:45 AM | Hash: 8fa3c21b9d3e7a1cfe2239ab1c9e76
+                </div>
+                <div class="emergency-actions">
+                    <button class="emergency-action-btn pdf-btn" id="emergencyPdfBtn">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M2 12L2 14C2 15.1046 2.89543 16 4 16L12 16C13.1046 16 14 15.1046 14 14L14 12" stroke="#1E5EFF" stroke-width="2"/>
+                            <path d="M8 1L8 11" stroke="#1E5EFF" stroke-width="2"/>
+                            <path d="M5 8L8 11L11 8" stroke="#1E5EFF" stroke-width="2"/>
+                        </svg>
+                        Download PDF
+                    </button>
+                    <button class="emergency-action-btn share-btn" id="emergencyShareBtn">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 1L8 11" stroke="#2ED47A" stroke-width="2"/>
+                            <path d="M5 8L8 11L11 8" stroke="#2ED47A" stroke-width="2"/>
+                            <circle cx="3" cy="13" r="2" stroke="#2ED47A" stroke-width="2"/>
+                            <circle cx="13" cy="13" r="2" stroke="#2ED47A" stroke-width="2"/>
+                        </svg>
+                        Share Secure Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="timeline.js"></script>
+    <script src="navbar-fix.js"></script>
+    <script src="ai-particles.js"></script>
+    
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* 1. NAVBAR SCROLL EFFECTS */
+        const navbar = document.querySelector('.navbar');
+        let lastScrollY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            
+            // Add scrolled class when scrolled down
+            if (currentScrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            lastScrollY = currentScrollY;
+        });
+
+        /* 2. MOBILE MENU FUNCTIONALITY */
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const navTabs = document.querySelector('.nav-tabs');
+        
+        if (hamburgerMenu) {
+            hamburgerMenu.addEventListener('click', () => {
+                navTabs.classList.toggle('active');
+                
+                // Animate hamburger lines
+                const lines = hamburgerMenu.querySelectorAll('.hamburger-line');
+                if (navTabs.classList.contains('active')) {
+                    lines[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+                    lines[1].style.opacity = '0';
+                    lines[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
+                } else {
+                    lines[0].style.transform = 'none';
+                    lines[1].style.opacity = '1';
+                    lines[2].style.transform = 'none';
+                }
+            });
+        }
+
+        /* 3. NAV TAB ACTIVE STATE MANAGEMENT */
+        const navTabsButtons = document.querySelectorAll('.nav-tab');
+        const currentPath = window.location.pathname;
+        
+        navTabsButtons.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                navTabsButtons.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Close mobile menu if open
+                if (window.innerWidth <= 768) {
+                    navTabs.classList.remove('active');
+                    const lines = hamburgerMenu.querySelectorAll('.hamburger-line');
+                    lines[0].style.transform = 'none';
+                    lines[1].style.opacity = '1';
+                    lines[2].style.transform = 'none';
+                }
+            });
+        });
+
+        /* 4. USER PROFILE DROPDOWN */
+        const userProfile = document.querySelector('.user-profile');
+        let dropdownTimeout;
+        
+        if (userProfile) {
+            userProfile.addEventListener('mouseenter', () => {
+                clearTimeout(dropdownTimeout);
+                // Add hover effect
+                userProfile.style.transform = 'scale(1.1)';
+            });
+            
+            userProfile.addEventListener('mouseleave', () => {
+                dropdownTimeout = setTimeout(() => {
+                    userProfile.style.transform = 'scale(1)';
+                }, 200);
+            });
+        }
+
+        /* 5. LOGOUT BUTTON FUNCTIONALITY */
+        const logoutBtn = document.querySelector('.logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                // Add confirmation animation
+                logoutBtn.style.transform = 'scale(0.95)';
+                logoutBtn.textContent = 'Logging out...';
+                
+                setTimeout(() => {
+                    // Simulate logout
+                    window.location.href = 'index.html';
+                }, 1000);
+            });
+        }
+
+        /* 6. SCROLL REVEAL (For Timeline Elements) */
+        const elements = document.querySelectorAll('.consultation-item, .timeline-entry, .emergency-card, .sidebar-card');
+
+        window.addEventListener('scroll', () => {
+            const trigger = window.innerHeight * 0.85;
+
+            elements.forEach((el, index) => {
+                const top = el.getBoundingClientRect().top;
+                if (top < trigger) {
+                    el.classList.add('fade-up');
+                    el.classList.add('show');
+                    el.style.transitionDelay = `${index * 0.1}s`;
+                }
+            });
+        });
+
+        // Trigger on load for top elements
+        window.dispatchEvent(new Event('scroll'));
+        
+        /* 7. EMERGENCY MODAL FUNCTIONALITY */
+        const emergencyModal = document.getElementById('emergencyModal');
+        const emergencyViewBtn = document.getElementById('emergencyViewBtn');
+        const emergencyClose = document.getElementById('emergencyClose');
+        
+        // Open emergency modal
+        if (emergencyViewBtn) {
+            emergencyViewBtn.addEventListener('click', () => {
+                emergencyModal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            });
+        }
+        
+        // Close emergency modal
+        function closeEmergencyModal() {
+            emergencyModal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+        
+        if (emergencyClose) {
+            emergencyClose.addEventListener('click', closeEmergencyModal);
+        }
+        
+        // Close modal when clicking outside
+        emergencyModal.addEventListener('click', (e) => {
+            if (e.target === emergencyModal) {
+                closeEmergencyModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && emergencyModal.classList.contains('active')) {
+                closeEmergencyModal();
+            }
+        });
+        
+        /* 8. EMERGENCY ACTION BUTTONS */
+        const emergencyPdfBtn = document.getElementById('emergencyPdfBtn');
+        const emergencyShareBtn = document.getElementById('emergencyShareBtn');
+        
+        if (emergencyPdfBtn) {
+            emergencyPdfBtn.addEventListener('click', () => {
+                // Simulate PDF download
+                const link = document.createElement('a');
+                link.href = '#';
+                link.download = 'emergency-patient-record.pdf';
+                link.click();
+                
+                // Show success feedback
+                emergencyPdfBtn.textContent = 'Downloaded!';
+                emergencyPdfBtn.style.background = '#2ed47a';
+                
+                setTimeout(() => {
+                    emergencyPdfBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M2 12L2 14C2 15.1046 2.89543 16 4 16L12 16C13.1046 16 14 15.1046 14 14L14 12" stroke="#1E5EFF" stroke-width="2"/>
+                            <path d="M8 1L8 11" stroke="#1E5EFF" stroke-width="2"/>
+                            <path d="M5 8L8 11L11 8" stroke="#1E5EFF" stroke-width="2"/>
+                        </svg>
+                        Download PDF
+                    `;
+                    emergencyPdfBtn.style.background = '';
+                }, 2000);
+            });
+        }
+        
+        if (emergencyShareBtn) {
+            emergencyShareBtn.addEventListener('click', () => {
+                // Simulate share functionality
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Emergency Patient Record',
+                        text: 'Emergency medical information for Sarah Johnson',
+                        url: window.location.href
+                    });
+                } else {
+                    // Fallback: copy link to clipboard
+                    navigator.clipboard.writeText(window.location.href);
+                    
+                    // Show success feedback
+                    emergencyShareBtn.textContent = 'Link Copied!';
+                    emergencyShareBtn.style.background = '#2ed47a';
+                    
+                    setTimeout(() => {
+                        emergencyShareBtn.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 1L8 11" stroke="#2ED47A" stroke-width="2"/>
+                                <path d="M5 8L8 11L11 8" stroke="#2ED47A" stroke-width="2"/>
+                                <circle cx="3" cy="13" r="2" stroke="#2ED47A" stroke-width="2"/>
+                                <circle cx="13" cy="13" r="2" stroke="#2ED47A" stroke-width="2"/>
+                            </svg>
+                            Share Secure Link
+                        `;
+                        emergencyShareBtn.style.background = '';
+                    }, 2000);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Story | Accountability at the Edge</title>
+
+    <!-- GSAP & ScrollTrigger Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* ---------- GLOBAL ---------- */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #f0fdfa;
+            /* Light calm blue backdrop */
+            color: #0f172a;
+            /* Dark text for readability */
+            overflow-x: hidden;
+            /* Scroll behavior smooth sometimes conflicts with GSAP scrubbing, omitting here */
+        }
+
+        /* ---------- ANIMATED SVG BACKGROUND (FIXED POSITION) ---------- */
+
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            /* Soft peach/blue glow for the edges instead of harsh dark */
+            background: radial-gradient(circle at center, transparent 40%, rgba(204, 251, 241, 0.4) 100%);
+            pointer-events: none;
+        }
+
+        /* Ambient SVG Animations */
+        path.animated-line {
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .line-flow-1 {
+            stroke-dasharray: 2000;
+            animation: drawAmbientLine 25s linear infinite;
+        }
+
+        .line-flow-2 {
+            stroke-dasharray: 1800;
+            animation: drawAmbientLine 28s linear infinite reverse;
+        }
+
+        .line-flow-3 {
+            stroke-dasharray: 2400;
+            animation: drawAmbientLine 35s linear infinite;
+        }
+
+        .line-ecg {
+            stroke-dasharray: 1500;
+            animation: drawAmbientLine 18s linear infinite;
+        }
+
+        @keyframes drawAmbientLine {
+            0% {
+                stroke-dashoffset: 4000;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .neural-node {
+            fill: #06b6d4;
+            animation: pulseNode 4s infinite alternate ease-in-out;
+            transform-origin: center;
+        }
+
+        .node-delay-1 {
+            animation-delay: 0s;
+        }
+
+        .node-delay-2 {
+            animation-delay: -1.5s;
+        }
+
+        .node-delay-3 {
+            animation-delay: -3s;
+        }
+
+        @keyframes pulseNode {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.3;
+                filter: drop-shadow(0 0 2px rgba(6, 182, 212, 0.3));
+            }
+
+            100% {
+                transform: scale(1.4);
+                opacity: 0.9;
+                filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.9));
+            }
+        }
+
+        .neural-connector {
+            stroke-dasharray: 400;
+            animation: drawAmbientLine 20s linear infinite;
+        }
+
+        /* Floating particles - softer colors */
+        .particle {
+            fill: #fdba74;
+            /* Soft peach particles */
+            filter: url(#blur-particle);
+            animation: floatParticle 25s infinite linear;
+            opacity: 0;
+        }
+
+        .p1 {
+            animation-delay: 0s;
+            animation-duration: 30s;
+        }
+
+        .p2 {
+            animation-delay: -5s;
+            animation-duration: 35s;
+        }
+
+        .p3 {
+            animation-delay: -12s;
+            animation-duration: 28s;
+        }
+
+        .p4 {
+            animation-delay: -18s;
+            animation-duration: 40s;
+        }
+
+        .p5 {
+            animation-delay: -7s;
+            animation-duration: 32s;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(0) translateX(0) scale(0.8);
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: translateY(-120px) translateX(60px) scale(1.5);
+                opacity: 0.5;
+            }
+
+            80% {
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: translateY(-240px) translateX(-40px) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* ---------- NORMAL SECTIONS ---------- */
+
+        section.normal-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 5rem 15%;
+            position: relative;
+            z-index: 2;
+            /* Sits above ambient background */
+        }
+
+        .bg-dark {
+            background: rgba(15, 23, 42, 0.3);
+        }
+
+        .bg-problem {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(124, 45, 18, 0.75));
+        }
+
+        .bg-solution {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.75), rgba(30, 58, 138, 0.75));
+        }
+
+        .bg-roadmap {
+            background: radial-gradient(circle at top right, rgba(224, 242, 254, 0.8), transparent 50%), linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(204, 251, 241, 0.4));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bg-final {
+            background: radial-gradient(circle at center, rgba(56, 189, 248, 0.15), transparent 70%), linear-gradient(135deg, rgba(204, 251, 241, 0.6), rgba(253, 186, 116, 0.2));
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Cinematic Outro */
+        .cinematic-outro {
+            max-width: 900px;
+            text-align: center;
+            padding: 5rem 4rem;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
+        }
+
+        .cinematic-outro h2 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            letter-spacing: -0.04em;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        .cinematic-outro h2 span {
+            background: linear-gradient(135deg, #0284c7 0%, #3b82f6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cinematic-outro p {
+            font-size: 1.5rem;
+            color: #475569;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .cinematic-button {
+            display: inline-block;
+            margin-top: 2.5rem;
+            padding: 1.25rem 3rem;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: white;
+            background: linear-gradient(135deg, #0284c7 0%, #3b82f6 100%);
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .cinematic-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 35px -5px rgba(2, 132, 199, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .cinematic-outro {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .cinematic-outro h2 {
+                font-size: 2.2rem;
+            }
+
+            .cinematic-outro p {
+                font-size: 1.125rem;
+            }
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            background: linear-gradient(to right, #0f172a, #334155);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            z-index: 10;
+            letter-spacing: -0.03em;
+            margin-bottom: 20px;
+        }
+
+        h2.section-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            z-index: 10;
+            color: #1e293b;
+        }
+
+        p.subtitle {
+            margin-top: 20px;
+            color: #475569;
+            font-size: 1.25rem;
+            max-width: 800px;
+            z-index: 10;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* Fade Up Utility for traditional scrolling sections */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: 1s ease;
+        }
+
+        .fade-up.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ---------- COMPONENT STYLES ---------- */
+        .split {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 40px;
+            z-index: 10;
+        }
+
+        .split div {
+            width: 300px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            transition: 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .split div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .split h3 {
+            margin-bottom: 15px;
+            font-size: 1.25rem;
+            color: #0f172a;
+        }
+
+        .split p {
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .timeline {
+            margin-top: 50px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .timeline div {
+            padding: 25px 35px;
+            background: rgba(255, 255, 255, 0.85);
+            border-left: 5px solid #38bdf8;
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: left;
+            font-size: 1.25rem;
+            color: #0f172a;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .timeline div::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.1), transparent);
+            transition: width 0.4s ease;
+            z-index: -1;
+        }
+
+        .timeline div:hover {
+            transform: translateX(10px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(56, 189, 248, 0.2);
+            border-left-color: #0284c7;
+        }
+
+        .timeline div:hover::before {
+            width: 100%;
+        }
+
+        .timeline div.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Scroll Down Indicator */
+        .scroll-indicator {
+            margin-top: 3rem;
+            animation: bounce 2s infinite ease-in-out;
+            opacity: 0.5;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+
+        /* ========================================= */
+        /*   GSAP APPLE-STYLE SCROLL STORYTELLING    */
+        /* ========================================= */
+
+        .story-container {
+            position: relative;
+            /* 4 steps = 400vh tall to scroll through */
+            height: 400vh;
+            z-index: 5;
+            /* Above ambient bg, between sections */
+            background: rgba(15, 23, 42, 0.8);
+            /* Darken bg during story */
+        }
+
+        .sticky-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Extra radial gradient for deep focus */
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.95) 100%);
+        }
+
+        .svg-gsap-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .gsap-story-path {
+            fill: none;
+            stroke: url(#gradient-story-stroke);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.6));
+        }
+
+        .text-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .story-step {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            opacity: 0;
+            visibility: hidden;
+            will-change: transform, opacity;
+        }
+
+        .story-step h2 {
+            font-size: 4rem;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #0284c7 0%, #3b82f6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .story-step p {
+            font-size: 1.5rem;
+            color: #6b7280;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* Text positions woven around the SVG curve */
+        .step-1 {
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .step-2 {
+            left: 10%;
+            transform: translateY(-50%);
+            text-align: left;
+            max-width: 500px;
+        }
+
+        .step-3 {
+            right: 10%;
+            transform: translateY(-50%);
+            text-align: right;
+            max-width: 500px;
+        }
+
+        .step-4 {
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            max-width: 800px;
+        }
+
+        @media (max-width: 768px) {
+            .story-step {
+                left: 50% !important;
+                right: auto !important;
+                transform: translate(-50%, -50%) !important;
+                text-align: center !important;
+                max-width: 95% !important;
+                padding: 0 1.5rem;
+                width: 100%;
+            }
+
+            .story-step h2 {
+                font-size: 2.2rem;
+                line-height: 1.1;
+                margin-bottom: 1rem;
+            }
+
+            .story-step p {
+                font-size: 1.1rem;
+            }
+
+            .gsap-story-path {
+                stroke-width: 3;
+            }
+        }
+
+        /* ========================================= */
+        /*   HORIZONTAL SLIDING SCROLL SECTION       */
+        /* ========================================= */
+
+        .story-section {
+            height: 500vh;
+            position: relative;
+            z-index: 5;
+            background: rgba(240, 253, 250, 0.5);
+            /* Calm light theme backdrop */
+        }
+
+        .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+            padding-left: 10vw;
+        }
+
+        .image-track {
+            display: flex;
+            gap: 60px;
+            will-change: transform;
+            width: max-content;
+            margin: 0;
+            padding: 0;
+        }
+
+        .image-track img {
+            width: 70vw;
+            max-width: 1000px;
+            height: auto;
+            max-height: 70vh;
+            border-radius: 16px;
+            object-fit: contain;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.2));
+            flex: 0 0 auto;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .text-panel {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            padding: 20px 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .text-panel h2 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #0284c7 0%, #3b82f6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: 0.4s ease;
+            margin-bottom: 10px;
+        }
+
+        .text-panel p {
+            color: #475569;
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .fade-slide {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.5s ease;
+        }
+
+        .fade-slide.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .image-track img {
+                width: 85vw;
+                max-height: 50vh;
+            }
+
+            .sticky-container {
+                padding-left: 5vw;
+            }
+
+            .text-panel {
+                width: 90%;
+                bottom: 5%;
+                padding: 15px;
+            }
+
+            .text-panel h2 {
+                font-size: 1.8rem;
+            }
+
+            .text-panel p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ========================================= -->
+    <!--  AMBIENT ANIMATED BACKGROUND (Fixed)      -->
+    <!-- ========================================= -->
+    <svg class="ambient-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
+        viewBox="0 0 1440 800">
+        <defs>
+            <filter id="glow-subtle" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="glow-heavy" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="blur-particle" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="15" />
+            </filter>
+
+            <!-- Lighter, softer strokes for the calm modern gradient -->
+            <linearGradient id="grad-indigo-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0" />
+                <stop offset="30%" stop-color="#38bdf8" stop-opacity="0.6" />
+                <stop offset="70%" stop-color="#818cf8" stop-opacity="0.6" />
+                <stop offset="100%" stop-color="#6ee7b7" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="grad-cyan-indigo" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#fdba74" stop-opacity="0" />
+                <stop offset="40%" stop-color="#fdba74" stop-opacity="0.5" />
+                <stop offset="60%" stop-color="#fbcfe8" stop-opacity="0.5" />
+                <stop offset="100%" stop-color="#bae6fd" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="grad-ecg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#fdba74" stop-opacity="0" />
+                <stop offset="25%" stop-color="#fdba74" stop-opacity="0.3" />
+                <stop offset="50%" stop-color="#fb923c" stop-opacity="0.9" /> /* Soft Peach ECG spike */
+                <stop offset="75%" stop-color="#38bdf8" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+            </linearGradient>
+        </defs>
+
+        <!-- Base smooth ambient data lines -->
+        <g filter="url(#glow-subtle)" opacity="0.6">
+            <path class="animated-line line-flow-1" d="M-100,500 C200,450 400,650 700,400 S1100,200 1540,300"
+                stroke="url(#grad-indigo-cyan)" stroke-width="1.5" />
+            <path class="animated-line line-flow-2" d="M-100,250 C300,150 500,450 800,300 S1200,150 1540,200"
+                stroke="url(#grad-cyan-indigo)" stroke-width="1" />
+            <path class="animated-line line-flow-3" d="M-100,700 C250,750 600,600 900,650 S1300,800 1540,750"
+                stroke="url(#grad-indigo-cyan)" stroke-width="2" />
+        </g>
+
+        <!-- Neural Nodes -->
+        <g filter="url(#glow-subtle)" opacity="0.4">
+            <path class="animated-line neural-connector" d="M300,250 L450,400 L700,300 L950,550" stroke="#38bdf8"
+                stroke-width="1" opacity="0.5" />
+            <path class="animated-line neural-connector" d="M450,400 L600,600 L800,300 L1100,200" stroke="#818cf8"
+                stroke-width="1" opacity="0.3" />
+            <path class="animated-line neural-connector" d="M700,300 L850,150 L1100,200" stroke="#2dd4bf"
+                stroke-width="1" opacity="0.4" />
+
+            <circle cx="300" cy="250" r="3" class="neural-node node-delay-1" />
+            <circle cx="450" cy="400" r="4" class="neural-node node-delay-2" />
+            <circle cx="700" cy="300" r="3" class="neural-node node-delay-3" />
+            <circle cx="950" cy="550" r="4" class="neural-node node-delay-1" />
+            <circle cx="600" cy="600" r="3" class="neural-node node-delay-2" />
+            <circle cx="800" cy="300" r="4" class="neural-node node-delay-3" />
+            <circle cx="1100" cy="200" r="3" class="neural-node node-delay-1" />
+            <circle cx="850" cy="150" r="3" class="neural-node node-delay-2" />
+        </g>
+
+        <!-- Ambient ECG Highlight -->
+        <g filter="url(#glow-heavy)" opacity="0.5">
+            <path class="animated-line line-ecg"
+                d="M-100,450 L300,450 L330,410 L360,530 L390,450 L650,450 C750,450 800,550 900,550 C1000,550 1050,450 1150,450 L1250,450 L1270,380 L1300,560 L1330,450 L1540,450"
+                stroke="url(#grad-ecg)" stroke-width="2.5" />
+        </g>
+
+        <!-- Particles -->
+        <g>
+            <circle cx="20%" cy="80%" r="30" class="particle p1" />
+            <circle cx="50%" cy="30%" r="40" class="particle p2" />
+            <circle cx="80%" cy="70%" r="25" class="particle p3" />
+            <circle cx="85%" cy="20%" r="45" class="particle p4" />
+            <circle cx="35%" cy="50%" r="20" class="particle p5" />
+        </g>
+    </svg>
+
+    <div class="vignette"></div>
+
+    <!-- ========================================= -->
+    <!--  HERO SECTION                             -->
+    <!-- ========================================= -->
+    <section class="normal-section bg-dark">
+        <!-- EdgeScribe Logo -->
+        <div class="hero-logo fade-up"
+            style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px;">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0284c7" />
+                        <stop offset="100%" stop-color="#38bdf8" />
+                    </linearGradient>
+                </defs>
+                <!-- Shield Outline -->
+                <path d="M 50,15 L 20,25 L 20,55 C 20,75 50,90 50,90 C 50,90 80,75 80,55 L 80,25 Z"
+                    stroke="url(#shield-grad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+
+                <!-- Main Pulse Line -->
+                <path d="M 0,55 L 30,55 L 40,30 L 55,75 L 65,45 L 72,55 L 90,55" stroke="url(#shield-grad)"
+                    stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="90" cy="55" r="4" fill="#38bdf8" />
+
+                <!-- Top Circuit Branch -->
+                <path d="M 72,55 L 78,43 L 95,43" stroke="url(#shield-grad)" stroke-width="4" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <circle cx="95" cy="43" r="4" fill="#38bdf8" />
+
+                <!-- Bottom Circuit Branch -->
+                <path d="M 60,60 L 68,70 L 90,70" stroke="url(#shield-grad)" stroke-width="4" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <circle cx="90" cy="70" r="4" fill="#38bdf8" />
+            </svg>
+            <span style="font-size: 3.5rem; font-weight: 500; letter-spacing: -0.05em; display:flex;">
+                <span style="color: #93c5fd;">Edge</span><span style="color: #0284c7;">Scribe</span>
+            </span>
+        </div>
+
+        <h1 class="fade-up">Accountability at the Edge</h1>
+        <p class="subtitle fade-up">Documentation without burnout. Accountability without bureaucracy.</p>
+
+        <div class="scroll-indicator fade-up">
+
+        </div>
+    </section>
+
+    <!-- ========================================= -->
+    <!--  GSAP SCROLL STORYTELLING BLOCK           -->
+    <!-- ========================================= -->
+    <div class="story-container">
+        <!-- Sticky viewport locker -->
+        <div class="sticky-wrapper">
+
+            <!-- Dynamic SVG Path matching the Clinical Flow -->
+            <svg class="svg-gsap-canvas" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <linearGradient id="gradient-story-stroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#bae6fd" />
+                        <stop offset="30%" stop-color="#38bdf8" />
+                        <stop offset="70%" stop-color="#fdba74" />
+                        <stop offset="100%" stop-color="#fb923c" />
+                    </linearGradient>
+                </defs>
+                <path id="gsap-draw-path" class="gsap-story-path"
+                    d="M -100,600 C 200,600 300,300 500,300 C 700,300 750,600 900,600 L 930,600 L 960,350 L 1020,800 L 1070,450 L 1100,600 C 1250,600 1350,300 1540,200" />
+            </svg>
+
+            <!-- Text overlay steps -->
+            <div class="text-layer">
+                <div class="story-step step-1">
+                    <h2>The Problem: Fragmentation</h2>
+                    <p>Intern doctors spend more time tracing fragmented records than delivering care. Burnout has
+                        become systemic.</p>
+                </div>
+                <div class="story-step step-2">
+                    <h2>Synthesizing The Pattern</h2>
+                    <p>Our localized AI seamlessly reads between the lines, mapping complex connections without
+                        compromising patient privacy.</p>
+                </div>
+                <div class="story-step step-3">
+                    <h2>The Vital Pulse</h2>
+                    <p>Detecting anomalies before they escalate. We surface critical, defensible insights exactly when
+                        decisions are being made.</p>
+                </div>
+                <div class="story-step step-4">
+                    <h2>Accountable Care</h2>
+                    <p>Every sentence is traceable. Every decision is defensible. Local-first design with hash-locked
+                        clinical records.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!--  HORIZONTAL SLIDING SCROLL SECTION        -->
+    <!-- ========================================= -->
+    <section class="story-section" id="horizontal-story">
+        <div class="sticky-container">
+            <div class="image-track" id="imageTrack">
+                <img src="image1.png" alt="Workflow Stages" />
+                <img src="image2.png" alt="Live Voice Transcript" />
+                <img src="image3.png" alt="Immutable Record Ledger" />
+                <img src="image4.png" alt="Emergency View" />
+                <img src="image5.png" alt="Confirmation Signature Modal" />
+            </div>
+
+            <div class="text-panel">
+                <h2 id="slide-title" class="fade-slide">Consultation Begins</h2>
+                <p id="slide-desc" class="fade-slide">
+                    Voice captured. Natural conversational logic recorded securely at the bedside.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================= -->
+    <!--  TRADITIONAL CONTENT SECTIONS             -->
+    <!-- ========================================= -->
+
+    <!-- DIFFERENCE/ARCHITECTURE Section -->
+
+
+    <!-- ROADMAP Section -->
+    <section class="normal-section bg-roadmap">
+        <h2 class="section-title fade-up">Roadmap</h2>
+        <div class="timeline">
+            <div>Phase 1 – Intern Pilot Deployment</div>
+            <div>Phase 2 – Multi-Hospital Integration</div>
+            <div>Phase 3 – Portable Patient Ledger</div>
+            <div>Phase 4 – AI-Assisted Compliance Insights</div>
+        </div>
+    </section>
+
+    <!-- FINAL OUTRO Section -->
+    <section class="normal-section bg-final">
+        <div class="cinematic-outro fade-up">
+            <h2>For the patients who need you.<br /><span>For the life you deserve.</span></h2>
+            <p>
+                We are building accountability that lives at the edge —<br />
+                reducing burnout while restoring the deeply human connection in modern medicine.
+            </p>
+            <a href="medledger.html" class="cinematic-button">Get Started</a>
+        </div>
+    </section>
+
+    <!-- ========================================= -->
+    <!--  COMBINED SCRIPTS                         -->
+    <!-- ========================================= -->
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* 1. SCROLL REVEAL (For Normal Sections) */
+        const elements = document.querySelectorAll('.fade-up');
+        const timelineItems = document.querySelectorAll('.timeline div');
+
+        window.addEventListener('scroll', () => {
+            const trigger = window.innerHeight * 0.85;
+
+            elements.forEach(el => {
+                const top = el.getBoundingClientRect().top;
+                if (top < trigger) {
+                    el.classList.add('show');
+                }
+            });
+
+            timelineItems.forEach((item, index) => {
+                const top = item.getBoundingClientRect().top;
+                if (top < trigger) {
+                    // Stagger the cards sliding in based on their index
+                    item.style.transitionDelay = `${index * 0.15}s`;
+                    item.classList.add('show');
+                }
+            });
+        });
+
+        // Trigger on load for top elements (Hero Section)
+        window.dispatchEvent(new Event('scroll'));
+
+        /* 2. GSAP APPLE-STYLE STORYTELLING LOGIC */
+        const path = document.querySelector('#gsap-draw-path');
+        if (path) {
+            const pathLength = path.getTotalLength();
+
+            // Hide the path initially
+            gsap.set(path, {
+                strokeDasharray: pathLength,
+                strokeDashoffset: pathLength
+            });
+
+            // Create timeline bound to .story-container scrolling
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".story-container",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1.5, // Apple-level scroll smoothing
+                }
+            });
+
+            // Path draws continuously as you scroll
+            tl.to(path, {
+                strokeDashoffset: 0,
+                ease: "none",
+                duration: 1
+            }, 0);
+
+            // Stagger text fade ins/outs
+            const steps = gsap.utils.toArray('.story-step');
+            const numSteps = steps.length;
+            const segmentDuration = 1 / numSteps;
+
+            steps.forEach((step, i) => {
+                const startTime = i * segmentDuration;
+
+                // Fade In
+                tl.fromTo(step,
+                    { autoAlpha: 0, y: 40 },
+                    { autoAlpha: 1, y: 0, duration: segmentDuration * 0.2, ease: "power2.out" },
+                    startTime
+                );
+
+                // Fade Out (unless it's the final narrative step)
+                if (i !== numSteps - 1) {
+                    tl.to(step,
+                        { autoAlpha: 0, y: -40, duration: segmentDuration * 0.2, ease: "power2.in" },
+                        startTime + segmentDuration * 0.8
+                    );
+                }
+            });
+        }
+
+        /* 3. GSAP HORIZONTAL SLIDING LOGIC */
+        const track = document.querySelector('#imageTrack');
+        const slideTitle = document.querySelector('#slide-title');
+        const slideDesc = document.querySelector('#slide-desc');
+        const storySection = document.querySelector('#horizontal-story');
+
+        const slideTexts = [
+            {
+                title: "Consultation Begins",
+                desc: "Voice captured. Natural conversational logic recorded securely at the bedside."
+            },
+            {
+                title: "AI Structures the Record",
+                desc: "SOAP format generated instantly with sentence-level traceability intact."
+            },
+            {
+                title: "Doctor Verifies & Signs",
+                desc: "Source mapping visible. Final approval locks the note permanently."
+            },
+            {
+                title: "Immutable Audit Trail",
+                desc: "Hash-secured record. Portable, defensible medical reasoning across all networks."
+            },
+            {
+                title: "Emergency View",
+                desc: "Cryptographic confirmation ensures the integrity of the clinical narrative."
+            }
+        ];
+
+        if (track && storySection) {
+            const tlSlide = gsap.timeline({
+                scrollTrigger: {
+                    trigger: storySection,
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1.5,
+                    onUpdate: (self) => {
+                        const progress = self.progress;
+                        const index = Math.min(
+                            slideTexts.length - 1,
+                            Math.max(0, Math.round(progress * (slideTexts.length - 1)))
+                        );
+
+                        if (slideTitle.innerText !== slideTexts[index].title) {
+                            slideTitle.classList.remove("show");
+                            slideDesc.classList.remove("show");
+
+                            // Quick fade out, string swap, and fade in
+                            setTimeout(() => {
+                                slideTitle.innerText = slideTexts[index].title;
+                                slideDesc.innerText = slideTexts[index].desc;
+                                slideTitle.classList.add("show");
+                                slideDesc.classList.add("show");
+                            }, 200);
+                        }
+                    }
+                }
+            });
+
+            // Slide images across the screen based on total track width
+            tlSlide.fromTo(track,
+                { x: 0 },
+                {
+                    x: () => {
+                        const trackWidth = track.scrollWidth;
+                        const containerPadding = parseFloat(window.getComputedStyle(track.parentElement).paddingLeft) || window.innerWidth * 0.1;
+                        return -(trackWidth - window.innerWidth + containerPadding);
+                    },
+                    ease: "none"
+                }
+            );
+
+            // Initial text trigger
+            setTimeout(() => {
+                slideTitle.classList.add("show");
+                slideDesc.classList.add("show");
+            }, 300);
+        }
+    </script>
+</body>
+
+</html>

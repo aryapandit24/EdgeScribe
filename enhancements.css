@@ -1,0 +1,474 @@
+/* UI Enhancements - Smooth Transitions, Animations, and Glassmorphism */
+
+/* Global Transitions */
+* {
+  transition: all 0.3s ease !important;
+}
+
+/* Enhanced Card Hover Effects */
+.card,
+.timeline-content-card,
+.emergency-card,
+.consultation-item,
+.action-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateY(0) translateZ(0);
+  will-change: transform;
+}
+
+.card:hover,
+.timeline-content-card:hover,
+.emergency-card:hover,
+.consultation-item:hover,
+.action-card:hover {
+  transform: translateY(-8px) translateZ(0) !important;
+  box-shadow: 0 20px 40px rgba(15, 47, 92, 0.15) !important;
+}
+
+.card:hover,
+.timeline-content-card:hover {
+  border-color: var(--color-primary) !important;
+}
+
+.emergency-card:hover {
+  border-color: #FF4757 !important;
+}
+
+.consultation-item:hover {
+  background: rgba(30, 94, 255, 0.08) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.action-card:hover {
+  background: rgba(30, 94, 255, 0.12) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Enhanced Record Button Pulse Animation */
+.record-btn {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: scale(1) translateZ(0);
+  will-change: transform, box-shadow;
+}
+
+.record-btn:hover {
+  transform: scale(1.05) translateZ(0) !important;
+  box-shadow: 0 12px 32px rgba(255, 71, 87, 0.4) !important;
+}
+
+.record-btn.recording {
+  animation: recordPulse 2s infinite !important;
+}
+
+.record-btn.recording:hover {
+  transform: scale(1.1) translateZ(0) !important;
+}
+
+@keyframes recordPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+    transform: scale(1) translateZ(0);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);
+    transform: scale(1.05) translateZ(0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+    transform: scale(1) translateZ(0);
+  }
+}
+
+/* Enhanced Pulse Ring */
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 80px;
+  height: 80px;
+  border: 3px solid var(--color-accent-red);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.record-btn.recording .pulse-ring {
+  animation: pulseRing 2s infinite !important;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Success Animation for Signed Notes */
+.sign-approve-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sign-approve-btn.signing {
+  background: linear-gradient(45deg, #2ED47A, #26C770) !important;
+  transform: scale(0.95) !important;
+}
+
+.sign-approve-btn.signed {
+  background: var(--color-text-muted) !important;
+  cursor: not-allowed !important;
+  position: relative;
+}
+
+.sign-approve-btn.signed::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(46, 212, 122, 0.3), transparent);
+  transform: translate(-50%, -50%) rotate(45deg);
+  animation: successSweep 0.6s ease-out;
+}
+
+@keyframes successSweep {
+  0% {
+    transform: translate(-50%, -50%) rotate(45deg) translateY(-100%);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(45deg) translateY(100%);
+  }
+}
+
+/* Success Checkmark Animation */
+.success-checkmark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 80px;
+  height: 80px;
+  background: var(--color-accent-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: successPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.success-checkmark svg {
+  width: 40px;
+  height: 40px;
+  stroke: white;
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: checkmarkDraw 0.4s ease-out 0.2s forwards;
+}
+
+@keyframes successPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes checkmarkDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Locked State Visual */
+.locked-state {
+  position: relative;
+  opacity: 0.7;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+.locked-state::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(46, 212, 122, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: lockAppear 0.5s ease-out;
+}
+
+.locked-state::before {
+  content: '🔒';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  z-index: 11;
+  animation: lockIcon 0.5s ease-out;
+}
+
+@keyframes lockAppear {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes lockIcon {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+}
+
+/* Enhanced Glassmorphism for Modals */
+.modal-overlay,
+.emergency-modal-overlay {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.modal,
+.note-modal,
+.emergency-modal {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.modal-overlay.active .modal,
+.modal-overlay.active .note-modal,
+.emergency-modal-overlay.active .emergency-modal {
+  transform: scale(1) translateZ(0) !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Enhanced Button Hover Effects */
+button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateY(0) translateZ(0);
+  will-change: transform, box-shadow;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px) translateZ(0) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0) translateZ(0) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Enhanced Navigation Items */
+.nav-item,
+.consultation-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateX(0) translateZ(0);
+}
+
+.nav-item:hover {
+  transform: translateX(4px) translateZ(0) !important;
+  background: var(--color-primary) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(30, 94, 255, 0.3) !important;
+}
+
+.consultation-item:hover {
+  transform: translateX(8px) translateZ(0) !important;
+}
+
+/* Enhanced Timeline Nodes */
+.node-circle {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: scale(1) translateZ(0);
+  will-change: transform, box-shadow;
+}
+
+.timeline-entry:hover .node-circle {
+  transform: scale(1.3) translateZ(0) !important;
+  box-shadow: 0 0 0 8px rgba(30, 94, 255, 0.2) !important;
+}
+
+/* Enhanced Sentence Blocks */
+.sentence-block {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: scale(1) translateZ(0);
+}
+
+.sentence-block:hover {
+  transform: scale(1.02) translateZ(0) !important;
+  box-shadow: 0 4px 12px rgba(30, 94, 255, 0.15) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Enhanced Status Indicators */
+.status-dot {
+  animation: statusPulse 2s infinite !important;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+/* Enhanced Emergency Button */
+.emergency-view-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: scale(1) translateZ(0);
+  will-change: transform, box-shadow;
+}
+
+.emergency-view-btn:hover {
+  transform: scale(1.05) translateZ(0) !important;
+  box-shadow: 0 8px 20px rgba(255, 71, 87, 0.3) !important;
+  background: #FF4757 !important;
+  color: white !important;
+}
+
+/* Enhanced Form Inputs */
+input,
+textarea,
+.search-input {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: scale(1) translateZ(0);
+}
+
+input:focus,
+textarea:focus,
+.search-input:focus {
+  transform: scale(1.01) translateZ(0) !important;
+  box-shadow: 0 0 0 4px rgba(30, 94, 255, 0.1) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Enhanced Tooltips */
+.notification-toast,
+.sentence-tooltip,
+.source-popup {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateY(0) translateZ(0);
+}
+
+/* Enhanced Loading States */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: loadingShimmer 1.5s infinite;
+}
+
+@keyframes loadingShimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Enhanced Badge Animations */
+.immutable-badge,
+.notification-badge {
+  animation: badgeAppear 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes badgeAppear {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Enhanced Responsive Transitions */
+@media (max-width: 768px) {
+  .card:hover,
+  .timeline-content-card:hover,
+  .emergency-card:hover {
+    transform: translateY(-4px) translateZ(0) !important;
+  }
+  
+  button:hover:not(:disabled) {
+    transform: translateY(-1px) translateZ(0) !important;
+  }
+}
+
+/* Performance Optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .record-btn.recording {
+    animation: none !important;
+  }
+  
+  .status-dot {
+    animation: none !important;
+  }
+}
